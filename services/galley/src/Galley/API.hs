@@ -678,6 +678,9 @@ sitemap = do
         .&. capture "uid"
         .&. accept "application" "json"
 
+    get "/i/team/members" (continue getBindingTeamMembers) $
+        zauthUserId
+
     get "/i/test/clients" (continue getClients)
         zauthUserId
 
