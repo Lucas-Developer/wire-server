@@ -7,7 +7,7 @@ module Galley.API.Util where
 
 import Brig.Types (Relation (..))
 import Brig.Types.Intra (ConnectionStatus (..), ReAuthUser (..))
-import Control.Lens (view, (&), (.~))
+import Control.Lens (view, (&), (.~), (^.))
 import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.IO.Class
@@ -112,6 +112,11 @@ acceptOne2One usr conv conn = case Data.convType conv of
     badConvState = Error status500 "bad-state"
                  $ "Connect conversation with more than 2 members: "
                 <> LT.pack (show cid)
+
+isOnlyFullPermissionMember :: Foldable m => UserId -> m TeamMember -> Bool
+isOnlyFullPermissionMember u =  not . any otherHasFullPerms
+  where
+    otherHasFullPerms x = hasFullPermissions x && x^.userId /= u
 
 isTeamMember :: Foldable m => UserId -> m TeamMember -> Bool
 isTeamMember u = isJust . findTeamMember u

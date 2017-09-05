@@ -53,6 +53,10 @@ operationDenied p = Error
 noTeamMember :: Error
 noTeamMember = Error status403 "no-team-member" "Requesting user is not a team member."
 
+noOtherFullPermissionMember :: Error
+noOtherFullPermissionMember = Error status403 "no-other-full-permission-member" "You are trying to remove or downgrade\
+                            \ a member with full permissions. Promote another team member before proceeding."
+
 noAddToManaged :: Error
 noAddToManaged = Error status403 "no-add-to-managed" "Adding users directly to managed conversation is not allowed."
 

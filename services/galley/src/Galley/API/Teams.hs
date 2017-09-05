@@ -233,6 +233,8 @@ updateTeamMember (zusr::: zcon ::: tid ::: req ::: _) = do
         throwM invalidPermissions
     unless (isTeamMember user members) $
         throwM teamMemberNotFound
+    when (user `isOnlyFullPermissionMember` members && perm /= fullPermissions) $
+        throwM noOtherFullPermissionMember
     Data.updateTeamMember tid user perm
     team <- tdTeam <$> (Data.team tid >>= ifNothing teamNotFound)
     when (team^.teamBinding == Binding) $
@@ -247,6 +249,8 @@ deleteTeamMember :: UserId ::: ConnId ::: TeamId ::: UserId ::: Request ::: Mayb
 deleteTeamMember (zusr::: zcon ::: tid ::: remove ::: req ::: _ ::: _) = do
     mems <- Data.teamMembers tid
     void $ permissionCheck zusr RemoveTeamMember mems
+    when (remove `isOnlyFullPermissionMember` mems) $
+        throwM noOtherFullPermissionMember
     team <- tdTeam <$> (Data.team tid >>= ifNothing teamNotFound)
     if team^.teamBinding == Binding && isTeamMember remove mems then do
         body <- fromBody req invalidPayload

@@ -46,6 +46,7 @@ module Galley.Types.Teams
     , newPermissions
     , fullPermissions
     , hasPermission
+    , hasFullPermissions
     , self
     , copy
 
@@ -92,7 +93,7 @@ module Galley.Types.Teams
     , newTeamDeleteData
     ) where
 
-import Control.Lens (makeLenses, (^.))
+import Control.Lens (makeLenses, view, (^.))
 import Control.Monad (when)
 import Data.Aeson
 import Data.Aeson.Types (Parser, Pair)
@@ -285,6 +286,9 @@ fullPermissions = let p = intToPerms maxBound in Permissions p p
 
 hasPermission :: TeamMember -> Perm -> Bool
 hasPermission tm p = p `Set.member` (tm^.permissions.self)
+
+hasFullPermissions :: TeamMember -> Bool
+hasFullPermissions = (== fullPermissions) . view permissions
 
 permToInt :: Perm -> Word64
 permToInt CreateConversation       = 0x0001
