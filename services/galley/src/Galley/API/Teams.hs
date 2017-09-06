@@ -397,5 +397,5 @@ getBindingTeamMembers zusr = do
   binding <- Data.teamBinding tid >>= ifNothing teamNotFound
   members <- Data.teamMembers tid
   case binding of
-    Binding -> pure $ json $ teamMemberListJson False (newTeamMemberList members)
+    Binding -> pure $ json $ teamMemberListJson True (newTeamMemberList members)
     NonBinding -> throwM nonBindingTeam
