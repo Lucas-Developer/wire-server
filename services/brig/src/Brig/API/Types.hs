@@ -138,6 +138,7 @@ data DeleteUserError
     | DeleteUserInvalidPassword
     | DeleteUserMissingPassword
     | DeleteUserPendingCode Timeout
+    | DeleteUserOnlyFullPermissionMember
 
 data AccountStatusError
     = InvalidAccountStatus

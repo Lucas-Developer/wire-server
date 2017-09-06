@@ -140,11 +140,12 @@ clientDataError ClientMissingAuth     = StdError missingAuthError
 clientDataError MalformedPrekeys      = StdError malformedPrekeys
 
 deleteUserError :: DeleteUserError -> Error
-deleteUserError DeleteUserInvalid         = StdError invalidUser
-deleteUserError DeleteUserInvalidCode     = StdError invalidCode
-deleteUserError DeleteUserInvalidPassword = StdError badCredentials
-deleteUserError DeleteUserMissingPassword = StdError missingAuthError
-deleteUserError (DeleteUserPendingCode t) = RichError deletionCodePending (DeletionCodeTimeout t) []
+deleteUserError DeleteUserInvalid                  = StdError invalidUser
+deleteUserError DeleteUserInvalidCode              = StdError invalidCode
+deleteUserError DeleteUserInvalidPassword          = StdError badCredentials
+deleteUserError DeleteUserMissingPassword          = StdError missingAuthError
+deleteUserError (DeleteUserPendingCode t)          = RichError deletionCodePending (DeletionCodeTimeout t) []
+deleteUserError DeleteUserOnlyFullPermissionMember = StdError noOtherFullPermissionMember
 
 accountStatusError :: AccountStatusError -> Error
 accountStatusError InvalidAccountStatus = StdError invalidAccountStatus
@@ -332,6 +333,10 @@ insufficientTeamPermissions = Wai.Error status403 "insufficient-permissions" "In
 
 noBindingTeam :: Wai.Error
 noBindingTeam = Wai.Error status403 "no-binding-team" "Operation allowed only on binding teams"
+
+noOtherFullPermissionMember :: Wai.Error
+noOtherFullPermissionMember = Wai.Error status403 "no-other-full-permission-member" "You are trying to remove or downgrade\
+                            \ a member with full permissions. Promote another team member before proceeding."
 
 loginsTooFrequent :: Wai.Error
 loginsTooFrequent = Wai.Error status429 "client-error" "Logins too frequent"

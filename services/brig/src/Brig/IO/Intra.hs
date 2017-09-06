@@ -36,6 +36,7 @@ module Brig.IO.Intra
     , getTeamMember
     , getTeamMembers
     , getTeam
+    , getBindingTeamMembers
     , changeTeamStatus
     ) where
 
@@ -558,3 +559,15 @@ changeTeamStatus tid s = do
         . header "Content-Type" "application/json"
         . expect2xx
         . lbytes (encode $ Team.TeamStatusUpdate s)
+
+getBindingTeamMembers :: UserId -> AppIO (Maybe Team.TeamMemberList)
+getBindingTeamMembers u = do
+    debug $ remote "galley" . msg (val "Get binding team members")
+    rs <- galleyRequest GET req
+    case Bilge.statusCode rs of
+        200 -> Just <$> decodeBody "galley" rs
+        _   -> return Nothing
+  where
+    req = path "i/team/members"
+        . zUser u
+        . expect [status200, status404]

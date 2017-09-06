@@ -110,6 +110,7 @@ import qualified Brig.IO.Intra              as Intra
 import qualified Brig.Types.Team.Invitation as Team
 import qualified Brig.Team.DB               as Team
 import qualified Data.Map.Strict            as Map
+import qualified Galley.Types.Teams         as Team
 import qualified System.Logger.Class        as Log
 
 -------------------------------------------------------------------------------
@@ -595,9 +596,18 @@ deleteUser uid pwd = do
         Nothing -> throwE DeleteUserInvalid
         Just  a -> case accountStatus a of
             Deleted   -> return Nothing
-            Suspended -> go a
-            Active    -> go a
+            Suspended -> ensureNotLastFullPermissionMember >> go a
+            Active    -> ensureNotLastFullPermissionMember >> go a
   where
+    isOnlyFullPermissionMember =  not . any otherHasFullPerms
+      where
+        otherHasFullPerms x = Team.hasFullPermissions x && ((view Team.userId x) /= uid)
+
+    ensureNotLastFullPermissionMember = lift (Intra.getBindingTeamMembers uid) >>= \case
+        Just mems | isOnlyFullPermissionMember (view Team.teamMembers mems) ->
+            throwE DeleteUserOnlyFullPermissionMember
+        _ -> return ()
+
     go a = maybe (byIdentity a) (byPassword a) pwd
 
     byIdentity a = case userIdentity (accountUser a) of
