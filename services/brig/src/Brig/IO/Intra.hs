@@ -540,6 +540,18 @@ getTeamMembers tid = do
     req = paths ["i", "teams", toByteString' tid, "members"]
         . expect2xx
 
+getBindingTeamMembers :: UserId -> AppIO (Maybe Team.TeamMemberList)
+getBindingTeamMembers u = do
+    debug $ remote "galley" . msg (val "Get binding team members")
+    rs <- galleyRequest GET req
+    case Bilge.statusCode rs of
+        200 -> Just <$> decodeBody "galley" rs
+        _   -> return Nothing
+  where
+    req = paths ["i", "users", toByteString' u, "team", "members"]
+        . expect [status200, status404]
+
+
 getTeam :: TeamId -> AppIO Team.TeamData
 getTeam tid = do
     debug $ remote "galley" . msg (val "Get team info")
